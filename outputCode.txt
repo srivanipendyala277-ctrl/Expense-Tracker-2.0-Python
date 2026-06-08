@@ -1,0 +1,140 @@
+import csv
+import os
+from datetime import datetime
+
+FILE_NAME = "expenses.csv"
+
+
+# Create file with header if it doesn't exist
+def initialize_file():
+    if not os.path.exists(FILE_NAME):
+        with open(FILE_NAME, "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Description", "Amount", "Category", "Date"])
+
+
+# Add expense
+def add_expense():
+    desc = input("Enter Description: ")
+    amount = float(input("Enter Amount: "))
+    category = input("Enter Category (Food/Travel/Shopping/etc): ")
+
+    with open(FILE_NAME, "a", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow([
+            desc,
+            amount,
+            category,
+            datetime.now().strftime("%Y-%m-%d")
+        ])
+
+    print("Expense Added Successfully!")
+
+
+# View all expenses
+def view_expenses():
+    with open(FILE_NAME, "r") as file:
+        reader = csv.reader(file)
+
+        print("\n--- All Expenses ---")
+        for row in reader:
+            print(row)
+
+
+# Search expenses by category
+def search_category():
+    category = input("Enter Category to Search: ")
+
+    with open(FILE_NAME, "r") as file:
+        reader = csv.reader(file)
+
+        print(f"\nExpenses in Category: {category}")
+        found = False
+
+        for row in reader:
+            if len(row) > 2 and row[2].lower() == category.lower():
+                print(row)
+                found = True
+
+        if not found:
+            print("No expenses found.")
+
+
+# Calculate total spent per category
+def total_per_category():
+    totals = {}
+
+    with open(FILE_NAME, "r") as file:
+        reader = csv.reader(file)
+        next(reader)
+
+        for row in reader:
+            category = row[2]
+            amount = float(row[1])
+
+            if category in totals:
+                totals[category] += amount
+            else:
+                totals[category] = amount
+
+    print("\n--- Total Spent Per Category ---")
+    for category, amount in totals.items():
+        print(f"{category}: ₹{amount}")
+
+
+# Monthly spending
+def monthly_spending():
+    month = input("Enter Month (YYYY-MM): ")
+
+    total = 0
+
+    with open(FILE_NAME, "r") as file:
+        reader = csv.reader(file)
+        next(reader)
+
+        for row in reader:
+            if row[3].startswith(month):
+                total += float(row[1])
+
+    print(f"Total Spending for {month}: ₹{total}")
+
+
+# Main Menu
+def menu():
+    initialize_file()
+
+    while True:
+        print("\n===== Expense Tracker 2.0 =====")
+        print("1. Add Expense")
+        print("2. View Expenses")
+        print("3. Search by Category")
+        print("4. Total Per Category")
+        print("5. Monthly Spending")
+        print("6. Exit")
+
+        choice = input("Enter Choice: ")
+
+        if choice == "1":
+            add_expense()
+
+        elif choice == "2":
+            view_expenses()
+
+        elif choice == "3":
+            search_category()
+
+        elif choice == "4":
+            total_per_category()
+
+        elif choice == "5":
+            monthly_spending()
+
+        elif choice == "6":
+            print("Thank You!")
+            break
+
+        else:
+            print("Invalid Choice!")
+
+
+menu()
